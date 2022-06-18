@@ -1,0 +1,11 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.section {
+  background-color: rgba(50, 0, 233, 0.2);
+  padding: 4px;
+  margin: 4px;
+  border-radius: 5px;
+}
