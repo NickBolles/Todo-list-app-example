@@ -1,21 +1,19 @@
 import * as React from "react";
 import { TodoListItem } from "./TodoListItem";
 import { RenderCounter } from "./RenderCounter";
-import { Todo, ToggleTodo } from "./types";
+import { useAppSelector } from "./store";
+import { selectTodos } from "./store/todos/TodosSlice";
 
-interface TodoListProps {
-  todos: Array<Todo>;
-  toggleTodo: ToggleTodo;
-}
-export const TodoList: React.FC<TodoListProps> = ({ todos, toggleTodo }) => {
+interface TodoListProps {}
+export const TodoList: React.FC<TodoListProps> = () => {
+  const todos = useAppSelector(selectTodos);
+
   return (
     <div className="section">
       <RenderCounter name="TodoList" />
       <ul>
         {todos.map((todo) => {
-          return (
-            <TodoListItem key={todo.text} todo={todo} toggleTodo={toggleTodo} />
-          );
+          return <TodoListItem key={todo.text} todoId={todo.text} />;
         })}
       </ul>
     </div>

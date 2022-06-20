@@ -1,15 +1,22 @@
 import * as React from "react";
-import { Todo, ToggleTodo } from "./types";
 import "./TodoListItem.css";
 import { RenderCounter } from "./RenderCounter";
+import { useAppDispatch, useAppSelector } from "./store";
+import { selectTodo, toggleTodo } from "./store/todos/TodosSlice";
 
 interface TodoListItemProps {
-  todo: Todo;
-  toggleTodo: ToggleTodo;
+  todoId: string;
 }
 
 export const TodoListItem: React.FC<TodoListItemProps> = React.memo(
-  ({ todo, toggleTodo }) => {
+  ({ todoId }) => {
+    const todo = useAppSelector(selectTodo(todoId));
+
+    const dispatch = useAppDispatch();
+    const handleToggleTodo = React.useCallback(() => {
+      dispatch(toggleTodo(todo.text));
+    }, [dispatch, todo]);
+
     return (
       <li className="section">
         <RenderCounter name="TodoListItem" />
@@ -17,7 +24,7 @@ export const TodoListItem: React.FC<TodoListItemProps> = React.memo(
           <input
             type="checkbox"
             checked={todo.complete}
-            onChange={() => toggleTodo(todo.text)}
+            onChange={() => handleToggleTodo()}
           />
           {todo.text}
         </label>
