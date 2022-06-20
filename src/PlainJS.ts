@@ -28,7 +28,7 @@ content.innerHTML =
 import { store } from "./store";
 import { toggleAllTodos } from "./store/todos/TodosSlice";
 
-let localTodos = store.getState().todos; // todo: do we need this?
+let localTodos = store.getState().todos.todos; // todo: do we need this?
 const reRenderLocalTodos = () => {
   content.innerHTML = JSON.stringify(localTodos, null, 2);
 };
@@ -50,46 +50,12 @@ store.subscribe(() => {
   reRenderLocalTodos();
 });
 
-// //-------------------------------------
-// // Sync things to local JS from app
-// messageAggregator.onMessage("todo:toggle", (data) => {
-//   const index = localTodos.findIndex((v) => v.text === data.text);
-//   if (!localTodos[index]) {
-//     alert(
-//       "todo with text '" +
-//         JSON.stringify(data) +
-//         "' does not exist in localTodos, current todos are " +
-//         JSON.stringify(localTodos, null, 2)
-//     );
-//     return;
-//   }
-//   localTodos[index].complete = !localTodos[index].complete;
-//   reRenderLocalTodos();
-// });
-
-// messageAggregator.onMessage("todo:remove", (data) => {
-//   const index = localTodos.findIndex((v) => (v.text = data.text));
-//   delete localTodos[index];
-//   reRenderLocalTodos();
-// });
-// messageAggregator.onMessage("todo:add", (data) => {
-//   localTodos.push(data);
-//   reRenderLocalTodos();
-// });
-
 //-------------------------------------
-// dump all logs to
-import * as messageAggregator from "./messageAggregator";
-
-messageAggregator.onMessage("*", (data) => {
-  const el = document.createElement("li");
-  el.textContent = JSON.stringify(data);
-  eventsSection.appendChild(el);
-});
+// dump all logs to dom
+// Removed - there are no more messages
 
 //-------------------------------------
 // Dispatch an event back to the store
 sendMsgButton.onclick = () => {
   store.dispatch(toggleAllTodos());
 };
-// messageAggregator.sendMessage("todo:toggleAll", {});

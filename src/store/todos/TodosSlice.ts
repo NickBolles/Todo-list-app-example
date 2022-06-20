@@ -1,7 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../RootStore";
-import type { Todo } from "../../types";
-import { sendMessage } from "../../messageAggregator";
+
+// Define types directly in the store, there's no need
+// to reference them anywhere because of type inference
+// does need to be exported to be "public" though
+export type Todo = {
+  text: string;
+  complete: boolean;
+};
+
 // Define a type for the slice state
 interface TODOState {
   todos: Todo[];
@@ -36,7 +43,6 @@ export const todosSlice = createSlice({
     // Use the PayloadAction type to declare the contents of `action.payload`
     addTodo: (state, action: PayloadAction<Todo>) => {
       state.todos.push(action.payload);
-      sendMessage("todo:add", action.payload);
     }
   }
 });
@@ -45,7 +51,7 @@ export const { addTodo, toggleTodo, toggleAllTodos } = todosSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectTodos = (state: RootState) => state.todos.todos;
-export const selectTodo = (text:string) => (state: RootState) => {
+export const selectTodo = (text: string) => (state: RootState) => {
   const index = findTodo(state.todos.todos, text);
   if (index < 0) return null;
   return state.todos.todos[index];

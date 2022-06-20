@@ -1,9 +1,11 @@
 import * as React from "react";
-import { Todo } from "./types";
 import { RenderCounter } from "./RenderCounter";
 import { useAppSelector } from "./store";
 import { selectTodos } from "./store/todos/TodosSlice";
 
+// This hook is an example of creating derived state
+// this should be in a central or re-usable spot, maybe
+// in a `hooks.ts` in the `todos` feature folder?
 const useTodoStats = () => {
   const todos = useAppSelector(selectTodos);
 

@@ -1,5 +1,4 @@
 import * as React from "react";
-// import { ToggleTodo } from "./types";
 import "./TodoListItem.css";
 import { RenderCounter } from "./RenderCounter";
 import { useAppDispatch, useAppSelector } from "./store";
