@@ -25,43 +25,62 @@ content.innerHTML =
 //-------------------------------------
 
 // Plain JS consumption of the store
-import * as messageAggregator from "./messageAggregator";
+import { store } from "./store";
+import { toggleAllTodos } from "./store/todos/TodosSlice";
 
-const localTodos = [];
+let localTodos = store.getState().todos; // todo: do we need this?
 const reRenderLocalTodos = () => {
   content.innerHTML = JSON.stringify(localTodos, null, 2);
 };
 reRenderLocalTodos();
-
-//-------------------------------------
-// Sync things to local JS from app
-messageAggregator.onMessage("todo:toggle", (data) => {
-  const index = localTodos.findIndex((v) => v.text === data.text);
-  if (!localTodos[index]) {
-    alert(
-      "todo with text '" +
-        JSON.stringify(data) +
-        "' does not exist in localTodos, current todos are " +
-        JSON.stringify(localTodos, null, 2)
-    );
-    return;
+store.subscribe(() => {
+  console.log(
+    "state updated, todos === ?",
+    store.getState().todos.todos === localTodos
+  );
+  if (store.getState().todos && localTodos) {
+    store.getState().todos.todos.forEach((v, i) => {
+      console.log(
+        `state updated for todo ${i}, todos === ?`,
+        v === localTodos[i]
+      );
+    });
   }
-  localTodos[index].complete = !localTodos[index].complete;
+  localTodos = store.getState().todos.todos;
   reRenderLocalTodos();
 });
 
-messageAggregator.onMessage("todo:remove", (data) => {
-  const index = localTodos.findIndex((v) => (v.text = data.text));
-  delete localTodos[index];
-  reRenderLocalTodos();
-});
-messageAggregator.onMessage("todo:add", (data) => {
-  localTodos.push(data);
-  reRenderLocalTodos();
-});
+// //-------------------------------------
+// // Sync things to local JS from app
+// messageAggregator.onMessage("todo:toggle", (data) => {
+//   const index = localTodos.findIndex((v) => v.text === data.text);
+//   if (!localTodos[index]) {
+//     alert(
+//       "todo with text '" +
+//         JSON.stringify(data) +
+//         "' does not exist in localTodos, current todos are " +
+//         JSON.stringify(localTodos, null, 2)
+//     );
+//     return;
+//   }
+//   localTodos[index].complete = !localTodos[index].complete;
+//   reRenderLocalTodos();
+// });
+
+// messageAggregator.onMessage("todo:remove", (data) => {
+//   const index = localTodos.findIndex((v) => (v.text = data.text));
+//   delete localTodos[index];
+//   reRenderLocalTodos();
+// });
+// messageAggregator.onMessage("todo:add", (data) => {
+//   localTodos.push(data);
+//   reRenderLocalTodos();
+// });
 
 //-------------------------------------
 // dump all logs to
+import * as messageAggregator from "./messageAggregator";
+
 messageAggregator.onMessage("*", (data) => {
   const el = document.createElement("li");
   el.textContent = JSON.stringify(data);
@@ -70,5 +89,7 @@ messageAggregator.onMessage("*", (data) => {
 
 //-------------------------------------
 // Dispatch an event back to the store
-sendMsgButton.onclick = () =>
-  messageAggregator.sendMessage("todo:toggleAll", {});
+sendMsgButton.onclick = () => {
+  store.dispatch(toggleAllTodos());
+};
+// messageAggregator.sendMessage("todo:toggleAll", {});

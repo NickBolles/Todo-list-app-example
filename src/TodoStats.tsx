@@ -1,19 +1,31 @@
 import * as React from "react";
 import { Todo } from "./types";
 import { RenderCounter } from "./RenderCounter";
+import { useAppSelector } from "./store";
+import { selectTodos } from "./store/todos/TodosSlice";
 
-interface TodoStatsProps {
-  todos: Array<Todo>;
-}
-export const TodoStats: React.FC<TodoStatsProps> = ({ todos }) => {
-  const completed = todos.filter((v) => v.complete).length;
-  const completePct = Math.floor((completed / todos.length) * 100);
+const useTodoStats = () => {
+  const todos = useAppSelector(selectTodos);
+
+  const total = todos.length;
+  const completed = todos.filter((v) => v.complete).length; //reduce((v, todo) => (todo.complete ? v++ : v), 0);
+  const percentComplete = Math.floor((completed / todos.length) * 100);
+  return {
+    total,
+    completed,
+    percentComplete
+  };
+};
+
+interface TodoStatsProps {}
+export const TodoStats: React.FC<TodoStatsProps> = () => {
+  const { total, completed, percentComplete } = useTodoStats();
   return (
     <div className="section">
       <RenderCounter name="todoStats" />
-      <p>Total: {todos.length}</p>
+      <p>Total: {total}</p>
       <p>
-        Completed: {completed} ({completePct}%)
+        Completed: {completed} ({percentComplete}%)
       </p>
     </div>
   );

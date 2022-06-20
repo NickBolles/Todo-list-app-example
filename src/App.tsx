@@ -6,31 +6,15 @@ import { AddTodo, Todo, ToggleTodo } from "./types";
 import { RenderCounter } from "./RenderCounter";
 import { AddTodoForm } from "./AddTodoForm";
 import { onMessage, removeHandler, sendMessage } from "./messageAggregator";
-
-const initialTodos: Array<Todo> = [
-  { text: "first todo", complete: true },
-  { text: "two", complete: false },
-  { text: "three", complete: false }
-];
+import { store, useAppDispatch } from "./store";
+import { toggleTodo, addTodo } from "./store/todos/TodosSlice";
+import { Provider } from "react-redux";
 
 const useTodos = () => {
-  const [todos, setTodos] = React.useState(initialTodos);
-
-  const toggleTodo: ToggleTodo = React.useCallback(
-    (text) => {
-      const newTodos = todos.map((todo) => {
-        if (todo.text === text) {
-          sendMessage("todo:toggle", todo);
-          return { ...todo, complete: !todo.complete };
-        }
-        return todo;
-      });
-      setTodos(newTodos);
-    },
-    [todos, setTodos]
-  );
-  const addTodo: AddTodo = (newTodo) => {
-    setTodos([...todos, newTodo]);
+  const dispatch = useAppDispatch();
+  const toggleTodoFn = (text: string) => dispatch(toggleTodo());
+  const addTodoFn = (newTodo: Todo) => {
+    dispatch(addTodo(newTodo));
     sendMessage("todo:add", newTodo);
   };
 
@@ -45,21 +29,22 @@ const useTodos = () => {
     };
   }, [toggleTodo, setTodos, todos]);
 
-  return { todos, addTodo, toggleTodo };
+  return { addTodo: addTodoFn, toggleTodo: toggleTodoFn };
 };
 
 const App: React.FC = () => {
-  const { todos, addTodo, toggleTodo } = useTodos();
   return (
-    <div className="App">
-      <h1>Todo list</h1>
-      <RenderCounter name="App" />
-      <AddTodoForm onAddTodo={addTodo} />
-      <br />
-      <TodoList todos={todos} toggleTodo={toggleTodo} />
-      <br />
-      <TodoStats todos={todos} />
-    </div>
+    <Provider store={store}>
+      <div className="App">
+        <h1>Todo list</h1>
+        <RenderCounter name="App" />
+        <AddTodoForm />
+        <br />
+        <TodoList />
+        <br />
+        <TodoStats />
+      </div>
+    </Provider>
   );
 };
 

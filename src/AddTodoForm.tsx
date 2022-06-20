@@ -1,25 +1,25 @@
 import * as React from "react";
-import { AddTodo } from "./types";
 import { RenderCounter } from "./RenderCounter";
+import { addTodo } from "./store/todos/TodosSlice";
+import { useAppDispatch } from "./store";
 
-interface AddTodoFormProps {
-  onAddTodo: AddTodo;
-}
-export const AddTodoForm: React.FC<AddTodoFormProps> = React.memo(
-  ({ onAddTodo }) => {
-    const [name, setName] = React.useState("");
+interface AddTodoFormProps {}
+export const AddTodoForm: React.FC<AddTodoFormProps> = React.memo(() => {
+  const [name, setName] = React.useState("");
 
-    const addTodoItem = () => {
-      onAddTodo({ complete: false, text: name });
-      setName("");
-    };
+  const dispatch = useAppDispatch();
 
-    return (
-      <div className="section">
-        <RenderCounter name="todoStats" />
-        <input value={name} onChange={(e) => setName(e.target.value)} />
-        <button onClick={addTodoItem}>Add Todo Item</button>
-      </div>
-    );
-  }
-);
+  const addTodoItem = () => {
+    const newTodo = { complete: false, text: name };
+    dispatch(addTodo(newTodo));
+    setName("");
+  };
+
+  return (
+    <div className="section">
+      <RenderCounter name="todoStats" />
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <button onClick={addTodoItem}>Add Todo Item</button>
+    </div>
+  );
+});
