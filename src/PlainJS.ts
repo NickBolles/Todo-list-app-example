@@ -14,7 +14,7 @@ container.innerHTML = html;
 document.body.appendChild(container);
 const content = document.getElementById("plainJSContent");
 const sendMsgButton = document.getElementById("plainJSSendMessage");
-const eventsSection = document.getElementById("plainJSEventsRecieved");
+// const eventsSection = document.getElementById("plainJSEventsRecieved");
 
 // Implementation, dump out info about the todos to content.innerHtml
 content.innerHTML =
@@ -25,15 +25,16 @@ content.innerHTML =
 //-------------------------------------
 
 // Plain JS consumption of the store
-import { store } from "./store";
+import { RootState, store } from "./store";
 import { toggleAllTodos } from "./store/todos/TodosSlice";
 
-let localTodos = store.getState().todos.todos; // todo: do we need this?
+let localTodos = store.getState().todos.todos;
 const reRenderLocalTodos = () => {
   content.innerHTML = JSON.stringify(localTodos, null, 2);
 };
 reRenderLocalTodos();
-store.subscribe(() => {
+
+const printRefComparisonsForStore = (state: RootState) => {
   console.log(
     "state updated, todos === ?",
     store.getState().todos.todos === localTodos
@@ -46,7 +47,11 @@ store.subscribe(() => {
       );
     });
   }
-  localTodos = store.getState().todos.todos;
+};
+store.subscribe(() => {
+  const state = store.getState();
+  printRefComparisonsForStore(state);
+  localTodos = state.todos.todos;
   reRenderLocalTodos();
 });
 
