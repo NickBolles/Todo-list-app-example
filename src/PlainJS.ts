@@ -28,7 +28,7 @@ content.innerHTML =
 import { RootState, store } from "./store";
 import { toggleAllTodos } from "./store/todos/TodosSlice";
 
-let localTodos = store.getState().todos.todos;
+let localTodos = store.getState().todos;
 const reRenderLocalTodos = () => {
   content.innerHTML = JSON.stringify(localTodos, null, 2);
 };
@@ -37,21 +37,22 @@ reRenderLocalTodos();
 const printRefComparisonsForStore = (state: RootState) => {
   console.log(
     "state updated, todos === ?",
-    store.getState().todos.todos === localTodos
+    state.todos.entities === localTodos.entities
   );
-  if (store.getState().todos && localTodos) {
-    store.getState().todos.todos.forEach((v, i) => {
+  if (state.todos && localTodos) {
+    const entities = state.todos.entities;
+    for (const id in entities) {
       console.log(
-        `state updated for todo ${i}, todos === ?`,
-        v === localTodos[i]
+        `state updated for todo ${id}, todos === ?`,
+        entities[id] === localTodos.entities[id]
       );
-    });
+    }
   }
 };
 store.subscribe(() => {
   const state = store.getState();
   printRefComparisonsForStore(state);
-  localTodos = state.todos.todos;
+  localTodos = state.todos;
   reRenderLocalTodos();
 });
 

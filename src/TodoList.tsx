@@ -11,6 +11,7 @@ export const TodoList: React.FC<TodoListProps> = () => {
   return (
     <div className="section">
       <RenderCounter name="TodoList" />
+      {JSON.stringify(todos, null, 2)}
       <ul>
         {todos.map((todo) => {
           return <TodoListItem key={todo.text} todoId={todo.text} />;

@@ -1,4 +1,8 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  PayloadAction,
+  createEntityAdapter
+} from "@reduxjs/toolkit";
 import type { RootState } from "../RootStore";
 
 // Define types directly in the store, there's no need
@@ -9,52 +13,70 @@ export type Todo = {
   complete: boolean;
 };
 
-// Define a type for the slice state
-interface TODOState {
-  todos: Todo[];
-}
+const todosAdapter = createEntityAdapter<Todo>({
+  // Assume IDs are stored in a field other than `id`
+  selectId: (todo) => todo.text,
+  // Keep the "all IDs" array sorted based on text
+  sortComparer: (a, b) => a.text.localeCompare(b.text)
+});
 
-// Define the initial state using that type
-const initialState: TODOState = {
-  todos: [
-    { text: "first todo", complete: true },
-    { text: "two", complete: false },
-    { text: "three", complete: false }
-  ]
-};
+// This is for use within reducers in this slice
+const localSelectors = todosAdapter.getSelectors();
 
-const findTodo = (todos: TODOState["todos"], text: string) =>
-  todos.findIndex((v) => v.text === text);
+// Other code such as selectors can use the imported `RootState` type
+export const todosSelectors = todosAdapter.getSelectors<RootState>(
+  (state) => state.todos
+);
 
-export const todosSlice = createSlice({
-  name: "TODO",
-  // `createSlice` will infer the state type from the `initialState` argument
+export const selectTodos = (state: RootState) =>
+  todosSelectors.selectAll(state);
+export const selectTodo = (text: string) => (state: RootState) =>
+  todosSelectors.selectById(state, text);
+
+// This part is only for demonstration purposes to initialize the list with some todos
+const entityState = todosAdapter.getInitialState();
+const initialState = todosAdapter.addMany(entityState, [
+  { text: "first todo", complete: true },
+  { text: "two", complete: false },
+  { text: "three", complete: false }
+]);
+
+const todosSlice = createSlice({
+  name: "todo",
   initialState,
   reducers: {
+    // Can pass adapter functions directly as case reducers.  Because we're passing this
+    // as a value, `createSlice` will auto-generate the `bookAdded` action type / creator
+    // bookAdded: todosAdapter.addOne,
+    // booksReceived(state, action) {
+    //   // Or, call them as "mutating" helpers in a case reducer
+    //   todosAdapter.setAll(state, action.payload.books)
+    // },
+
     toggleAllTodos: (state) => {
-      for (const todo of state.todos) {
-        todo.complete = !todo.complete;
-      }
+      const allTodos = localSelectors.selectAll(state);
+      const updates = allTodos.map((todo) => ({
+        id: todo.text,
+        changes: { complete: !todo.complete }
+      }));
+
+      todosAdapter.updateMany(state, updates);
     },
     toggleTodo: (state, action: PayloadAction<string>) => {
-      const i = findTodo(state.todos, action.payload);
-      state.todos[i].complete = !state.todos[i].complete;
+      const todo = localSelectors.selectById(state, action.payload);
+      todosAdapter.updateOne(state, {
+        id: action.payload,
+        changes: { complete: !todo.complete }
+      });
     },
     // Use the PayloadAction type to declare the contents of `action.payload`
-    addTodo: (state, action: PayloadAction<Todo>) => {
-      state.todos.push(action.payload);
-    }
+    // addTodo: (state, action: PayloadAction<Todo>) => {
+    //   todosAdapter.setOne(state, action.payload);
+    // }
+    addTodo: todosAdapter.addOne
   }
 });
 
 export const { addTodo, toggleTodo, toggleAllTodos } = todosSlice.actions;
-
-// Other code such as selectors can use the imported `RootState` type
-export const selectTodos = (state: RootState) => state.todos.todos;
-export const selectTodo = (text: string) => (state: RootState) => {
-  const index = findTodo(state.todos.todos, text);
-  if (index < 0) return null;
-  return state.todos.todos[index];
-};
 
 export default todosSlice.reducer;
